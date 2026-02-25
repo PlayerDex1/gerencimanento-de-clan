@@ -1,13 +1,17 @@
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 
+const app = express();
+app.use(express.json());
+
 const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://mgylypvmgjebvpxhlmly.supabase.co';
 const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_RG-4on-iquEBjcvHD-ZAMw_SqZTkHTS';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const app = express();
-app.use(express.json());
-
+// Add a simple health check route to verify the API is alive
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', message: 'API is running' });
+});
 // Add a simple health check route to verify the API is alive
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'API is running' });
