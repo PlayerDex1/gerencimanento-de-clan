@@ -1,7 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { createContext, useContext, useState } from 'react';
 
-type AuthContextType = {
+interface AuthContextType {
   user: any;
   profile: any;
   clan: any;
@@ -9,61 +8,38 @@ type AuthContextType = {
   loading: boolean;
   signOut: () => Promise<void>;
   refreshContext: () => Promise<void>;
-};
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [clan, setClan] = useState<any>(null);
-  const [member, setMember] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  // Mock user data to bypass login completely
+  const [user] = useState<any>({ id: 'mock-user-123', email: 'admin@local.dev' });
+  const [profile] = useState<any>({ id: 'mock-user-123', username: 'Admin' });
+  
+  // Mock clan data so we go straight to the dashboard
+  const [clan] = useState<any>({ 
+    id: 'mock-clan-123', 
+    name: 'Admin Clan', 
+    server: 'LocalServer',
+    leader_id: 'mock-user-123'
+  });
+  
+  const [member] = useState<any>({ 
+    id: 'mock-member-123', 
+    clan_id: 'mock-clan-123', 
+    role: 'leader',
+    in_game_name: 'AdminPlayer'
+  });
 
-  const fetchContext = async (userId: string) => {
-    try {
-      const res = await fetch(`/api/users/${userId}/context`);
-      if (res.ok) {
-        const data = await res.json();
-        setProfile(data.user);
-        setClan(data.clan);
-        setMember(data.member);
-      }
-    } catch (error) {
-      console.error('Failed to fetch user context', error);
-    }
-  };
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchContext(session.user.id).finally(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchContext(session.user.id);
-      } else {
-        setProfile(null);
-        setClan(null);
-        setMember(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const [loading] = useState(false);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    console.log('Sign out disabled in mock mode');
   };
 
   const refreshContext = async () => {
-    if (user) await fetchContext(user.id);
+    console.log('Refresh context disabled in mock mode');
   };
 
   return (
