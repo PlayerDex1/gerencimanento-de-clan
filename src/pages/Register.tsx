@@ -1,17 +1,49 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Mail, Lock, User } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-export default function Register() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+          }
+        }
+      });
 
-  const handleRegister = async (e: React.FormEvent) => {
+      if (signUpError) {
+        setError(signUpError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (data.user) {
+        // Sync user to our public users table
+        const res = await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: data.user.id,
+            email: data.user.email,
+            username: username
+          })
+        });
+        
+        if (!res.ok) {
+          console.error('Failed to sync user to database');
+        }
+        
+        navigate('/create-clan');
+      }
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      setError(err.message || 'Failed to complete registration setup.');
+    }
+    setLoading(false);
+  };
     e.preventDefault();
     setLoading(true);
     setError('');
