@@ -1,40 +1,63 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Search, Plus, Shield, ShieldAlert, User, Trash2, Swords, ArrowUpDown, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Members() {
-  const [members, setMembers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Mock members data
+  const [members, setMembers] = useState<any[]>([
+    {
+      id: 'm1',
+      in_game_name: 'AdminPlayer',
+      role: 'leader',
+      join_date: '2023-01-15T00:00:00Z',
+      cp_name: 'Alpha Squad',
+      class: 'Paladin',
+      class_group: 'Tank',
+      level: 85,
+      combat_power: 45000,
+      total_events: 10,
+      attended_events: 9,
+      status: 'active'
+    },
+    {
+      id: 'm2',
+      in_game_name: 'HealMePls',
+      role: 'officer',
+      join_date: '2023-02-20T00:00:00Z',
+      cp_name: 'Alpha Squad',
+      class: 'Bishop',
+      class_group: 'Healer',
+      level: 84,
+      combat_power: 42000,
+      total_events: 10,
+      attended_events: 10,
+      status: 'active'
+    },
+    {
+      id: 'm3',
+      in_game_name: 'StabbyStab',
+      role: 'member',
+      join_date: '2023-03-10T00:00:00Z',
+      cp_name: null,
+      class: 'Treasure Hunter',
+      class_group: 'Melee DPS',
+      level: 82,
+      combat_power: 38000,
+      total_events: 10,
+      attended_events: 4,
+      status: 'inactive'
+    }
+  ]);
+  
+  const [loading] = useState(false);
   const [search, setSearch] = useState('');
   const [classFilter, setClassFilter] = useState('All');
   const [cpFilter, setCpFilter] = useState('All');
   const [sortConfig, setSortConfig] = useState({ key: 'combat_power', direction: 'desc' });
 
-  const fetchMembers = () => {
-    fetch('/api/clans/c1/members')
-      .then((res) => res.json())
-      .then((data) => {
-        setMembers(data);
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchMembers();
-  }, []);
-
   const handleRemoveMember = async (memberId: string) => {
     if (confirm('Are you sure you want to remove this member?')) {
-      try {
-        const res = await fetch(`/api/clans/c1/members/${memberId}`, {
-          method: 'DELETE',
-        });
-        if (res.ok) {
-          fetchMembers();
-        }
-      } catch (error) {
-        console.error('Failed to remove member', error);
-      }
+      setMembers(members.filter(m => m.id !== memberId));
     }
   };
 
