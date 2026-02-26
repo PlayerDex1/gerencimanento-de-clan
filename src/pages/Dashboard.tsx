@@ -1,24 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Users, Shield, Calendar, Swords, Activity } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<any>(null);
   const { clan } = useAuth();
 
-  useEffect(() => {
-    if (clan) {
-      fetch(`/api/clans/${clan.id}/stats`)
-        .then(res => res.json())
-        .then(data => setStats(data))
-        .catch(console.error);
-    }
-  }, [clan]);
+  // Mock stats for the dashboard since we are bypassing the backend
+  const stats = {
+    generalStats: {
+      totalMembers: 42,
+      avgLevel: 82,
+      totalPower: 1250000
+    },
+    classDistribution: [
+      { name: 'Tank', value: 5 },
+      { name: 'Healer', value: 8 },
+      { name: 'Buffer', value: 6 },
+      { name: 'Melee DPS', value: 12 },
+      { name: 'Archer', value: 7 },
+      { name: 'Mage', value: 4 },
+    ],
+    cpPower: [
+      { name: 'Alpha Squad', totalPower: 450000 },
+      { name: 'Bravo Team', totalPower: 380000 },
+      { name: 'Charlie Force', totalPower: 420000 },
+    ],
+    recruitmentNeeds: [
+      { cp_name: 'Alpha Squad', recruiting_classes: 'Bishop, Elven Elder' },
+      { cp_name: 'Bravo Team', recruiting_classes: 'Paladin, Swordsinger' },
+    ]
+  };
 
   const COLORS = ['#818cf8', '#34d399', '#fbbf24', '#f87171', '#a78bfa', '#60a5fa'];
-
-  if (!stats) return <div className="p-8 text-zinc-500">Loading dashboard...</div>;
 
   const summaryCards = [
     { name: 'Total Active Members', value: stats.generalStats.totalMembers, icon: Users, change: 'All CPs' },
@@ -37,7 +51,7 @@ export default function Dashboard() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Clan Dashboard</h1>
-        <p className="text-zinc-400 mt-2">Overview of DragonSlayers roster, power, and organization.</p>
+        <p className="text-zinc-400 mt-2">Overview of {clan?.name || 'your clan'} roster, power, and organization.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
