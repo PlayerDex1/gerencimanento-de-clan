@@ -13,13 +13,14 @@ export default function Layout() {
     return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-500">Loading...</div>;
   }
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+  // Bypassing login checks for now
+  // if (!user) {
+  //   return <Navigate to="/login" state={{ from: location }} replace />;
+  // }
 
-  if (!clan) {
-    return <Navigate to="/create-clan" replace />;
-  }
+  // if (!clan) {
+  //   return <Navigate to="/create-clan" replace />;
+  // }
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Shield },
@@ -36,7 +37,7 @@ export default function Layout() {
       <aside className="hidden md:flex flex-col w-64 border-r border-zinc-800 bg-zinc-900/50">
         <div className="p-6 flex items-center gap-3 border-b border-zinc-800">
           <Shield className="w-8 h-8 text-indigo-500" />
-          <span className="font-bold text-xl tracking-tight truncate">{clan.name}</span>
+          <span className="font-bold text-xl tracking-tight truncate">{clan?.name || 'Admin Clan'}</span>
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-1">
@@ -80,7 +81,7 @@ export default function Layout() {
         <header className="md:hidden flex items-center justify-between p-4 border-b border-zinc-800 bg-zinc-900/50">
           <div className="flex items-center gap-2">
             <Shield className="w-6 h-6 text-indigo-500" />
-            <span className="font-bold text-lg truncate">{clan.name}</span>
+            <span className="font-bold text-lg truncate">{clan?.name || 'Admin Clan'}</span>
           </div>
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
             <Menu className="w-6 h-6 text-zinc-400" />
