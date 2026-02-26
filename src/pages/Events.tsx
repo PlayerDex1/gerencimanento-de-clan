@@ -1,19 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Calendar as CalendarIcon, Plus, Users, Clock, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Events() {
-  const [events, setEvents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch('/api/clans/c1/events')
-      .then((res) => res.json())
-      .then((data) => {
-        setEvents(data);
-        setLoading(false);
-      });
-  }, []);
+  const [events, setEvents] = useState<any[]>([
+    { id: 'e1', name: 'Antharas Raid', type: 'Epic Boss', date: new Date(Date.now() + 86400000).toISOString(), mandatory: true },
+    { id: 'e2', name: 'Castle Siege', type: 'PvP', date: new Date(Date.now() + 172800000).toISOString(), mandatory: true },
+    { id: 'e3', name: 'Clan Farm', type: 'PvE', date: new Date(Date.now() + 259200000).toISOString(), mandatory: false }
+  ]);
+  const [loading] = useState(false);
 
   return (
     <div className="space-y-6">
