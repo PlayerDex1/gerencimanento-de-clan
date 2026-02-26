@@ -1,4 +1,23 @@
-const handleCreate = async (e: React.FormEvent) => {
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Shield, Swords, Server, LogOut } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+
+export default function CreateClan() {
+  const { user, signOut, refreshContext } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const [formData, setFormData] = useState({
+    clanName: '',
+    server: 'Skelth',
+    inGameName: '',
+    className: '',
+    classGroup: 'Tank'
+  });
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -29,36 +48,6 @@ const handleCreate = async (e: React.FormEvent) => {
       }
     } catch (err) {
       console.error('Unexpected error during clan creation:', err);
-      setError('An unexpected error occurred.');
-    }
-    setLoading(false);
-  };
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const res = await fetch('/api/clans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.clanName,
-          server: formData.server,
-          leader_id: user.id,
-          in_game_name: formData.inGameName,
-          className: formData.className,
-          classGroup: formData.classGroup
-        })
-      });
-
-      if (res.ok) {
-        await refreshContext();
-        navigate('/');
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Failed to create clan');
-      }
-    } catch (err) {
       setError('An unexpected error occurred.');
     }
     setLoading(false);
