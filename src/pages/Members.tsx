@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Search, Plus, Shield, ShieldAlert, User, Trash2, Swords, ArrowUpDown, Filter } from 'lucide-react';
+import { Search, Plus, Shield, ShieldAlert, User, Trash2, Swords, ArrowUpDown, Filter, X } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function Members() {
@@ -54,6 +54,40 @@ export default function Members() {
   const [classFilter, setClassFilter] = useState('All');
   const [cpFilter, setCpFilter] = useState('All');
   const [sortConfig, setSortConfig] = useState({ key: 'combat_power', direction: 'desc' });
+
+  // Modal State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newMember, setNewMember] = useState({
+    in_game_name: '',
+    class: '',
+    class_group: 'Tank',
+    level: 1,
+    combat_power: 0,
+    cp_name: ''
+  });
+
+  const handleAddMember = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newId = `m${Date.now()}`;
+    setMembers([...members, {
+      id: newId,
+      ...newMember,
+      role: 'member',
+      join_date: new Date().toISOString(),
+      total_events: 0,
+      attended_events: 0,
+      status: 'active'
+    }]);
+    setIsAddModalOpen(false);
+    setNewMember({
+      in_game_name: '',
+      class: '',
+      class_group: 'Tank',
+      level: 1,
+      combat_power: 0,
+      cp_name: ''
+    });
+  };
 
   const handleRemoveMember = async (memberId: string) => {
     if (confirm('Are you sure you want to remove this member?')) {
@@ -111,7 +145,10 @@ export default function Members() {
           <h1 className="text-3xl font-bold tracking-tight text-zinc-100">Clan Roster</h1>
           <p className="text-zinc-400 mt-1">Manage all members, CPs, and combat power.</p>
         </div>
-        <button className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+        >
           <Plus className="w-4 h-4" />
           Add Member
         </button>
@@ -261,6 +298,113 @@ export default function Members() {
           </table>
         </div>
       </div>
+
+      {/* Add Member Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+              <h2 className="text-lg font-bold text-zinc-100">Add New Member</h2>
+              <button 
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-zinc-500 hover:text-zinc-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleAddMember} className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">In-Game Name</label>
+                <input 
+                  required
+                  type="text" 
+                  value={newMember.in_game_name}
+                  onChange={e => setNewMember({...newMember, in_game_name: e.target.value})}
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g. HeroPlayer"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Class</label>
+                  <input 
+                    required
+                    type="text" 
+                    value={newMember.class}
+                    onChange={e => setNewMember({...newMember, class: e.target.value})}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="e.g. Paladin"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Role Group</label>
+                  <select 
+                    value={newMember.class_group}
+                    onChange={e => setNewMember({...newMember, class_group: e.target.value})}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="Tank">Tank</option>
+                    <option value="Healer">Healer</option>
+                    <option value="Buffer">Buffer</option>
+                    <option value="Melee DPS">Melee DPS</option>
+                    <option value="Archer">Archer</option>
+                    <option value="Mage">Mage</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Level</label>
+                  <input 
+                    required
+                    type="number" 
+                    min="1"
+                    value={newMember.level}
+                    onChange={e => setNewMember({...newMember, level: parseInt(e.target.value) || 1})}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-1">Combat Power</label>
+                  <input 
+                    required
+                    type="number" 
+                    min="0"
+                    value={newMember.combat_power}
+                    onChange={e => setNewMember({...newMember, combat_power: parseInt(e.target.value) || 0})}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-1">CP Name (Optional)</label>
+                <input 
+                  type="text" 
+                  value={newMember.cp_name}
+                  onChange={e => setNewMember({...newMember, cp_name: e.target.value})}
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g. Alpha Squad"
+                />
+              </div>
+              <div className="pt-4 flex justify-end gap-3">
+                <button 
+                  type="button"
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="px-4 py-2 text-zinc-400 hover:text-zinc-200 font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+                >
+                  Add Member
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
