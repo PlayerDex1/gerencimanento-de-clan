@@ -1,39 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Search, Check, X, MessageSquare, Clock, Users, User, Link as LinkIcon, Copy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function Applications() {
-  const [applications, setApplications] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [applications, setApplications] = useState<any[]>([
+    {
+      id: 'app1',
+      name: 'ShadowBlade',
+      type: 'solo',
+      class: 'Ghost Hunter',
+      level: 82,
+      combat_power: 39000,
+      discord: 'shadow#1234',
+      playtime: 'Evening',
+      notes: 'Looking for a chill clan to do instances.',
+      status: 'pending',
+      created_at: new Date(Date.now() - 3600000).toISOString()
+    },
+    {
+      id: 'app2',
+      name: 'MageSquad',
+      type: 'cp',
+      class: 'Mage Party (9/9)',
+      level: 84,
+      combat_power: 380000,
+      discord: 'magelead#9999',
+      playtime: 'Hardcore',
+      notes: 'Full CP ready to join for sieges and epics.',
+      status: 'pending',
+      created_at: new Date(Date.now() - 86400000).toISOString()
+    }
+  ]);
+  const [loading] = useState(false);
   const [filter, setFilter] = useState('pending');
   const [copied, setCopied] = useState(false);
 
-  const fetchApplications = () => {
-    fetch('/api/clans/c1/applications')
-      .then((res) => res.json())
-      .then((data) => {
-        setApplications(data);
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchApplications();
-  }, []);
-
   const handleUpdateStatus = async (id: string, status: string) => {
-    try {
-      const res = await fetch(`/api/clans/c1/applications/${id}/status`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      if (res.ok) {
-        fetchApplications();
-      }
-    } catch (error) {
-      console.error('Failed to update status', error);
-    }
+    setApplications(applications.map(app => app.id === id ? { ...app, status } : app));
   };
 
   const copyApplyLink = () => {
