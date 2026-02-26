@@ -1,26 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Users, Plus, Shield, Swords, ChevronDown, ChevronRight, Edit2 } from 'lucide-react';
 
 export default function ConstantParties() {
-  const [cps, setCps] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [expandedCp, setExpandedCp] = useState<string | null>(null);
-
-  const fetchCps = () => {
-    fetch('/api/clans/c1/cps')
-      .then((res) => res.json())
-      .then((data) => {
-        setCps(data);
-        if (data.length > 0 && !expandedCp) {
-          setExpandedCp(data[0].id);
-        }
-        setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchCps();
-  }, []);
+  const [cps, setCps] = useState<any[]>([
+    {
+      id: 'cp1',
+      name: 'Alpha Squad',
+      leader_id: 'm1',
+      leader_name: 'AdminPlayer',
+      recruiting_classes: 'Bishop, Elven Elder',
+      members: [
+        { id: 'm1', in_game_name: 'AdminPlayer', class: 'Paladin', level: 85, combat_power: 45000 },
+        { id: 'm2', in_game_name: 'HealMePls', class: 'Bishop', level: 84, combat_power: 42000 }
+      ]
+    },
+    {
+      id: 'cp2',
+      name: 'Bravo Team',
+      leader_id: 'm4',
+      leader_name: 'BowMaster',
+      recruiting_classes: 'Paladin, Swordsinger',
+      members: [
+        { id: 'm4', in_game_name: 'BowMaster', class: 'Hawkeye', level: 83, combat_power: 40000 },
+        { id: 'm5', in_game_name: 'SingForMe', class: 'Swordsinger', level: 81, combat_power: 35000 }
+      ]
+    }
+  ]);
+  const [loading] = useState(false);
+  const [expandedCp, setExpandedCp] = useState<string | null>('cp1');
 
   const toggleCp = (id: string) => {
     setExpandedCp(expandedCp === id ? null : id);
@@ -29,16 +36,7 @@ export default function ConstantParties() {
   const handleEditNeeds = async (cpId: string, currentNeeds: string) => {
     const newNeeds = prompt('Enter recruiting classes (comma separated):', currentNeeds || '');
     if (newNeeds !== null) {
-      try {
-        await fetch(`/api/clans/c1/cps/${cpId}/needs`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recruiting_classes: newNeeds })
-        });
-        fetchCps();
-      } catch (error) {
-        console.error('Failed to update needs', error);
-      }
+      setCps(cps.map(cp => cp.id === cpId ? { ...cp, recruiting_classes: newNeeds } : cp));
     }
   };
 
