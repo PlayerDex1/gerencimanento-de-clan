@@ -84,27 +84,30 @@ export default function Market() {
   const [chartData, setChartData] = useState<{ time: string; price: number }[]>([]);
   const [chartLoading, setChartLoading] = useState(false);
 
+  // Stable icon cache — persists first seen icon per item name (prevents flicker on re-renders)
+  const iconCache = useState<Record<string, string>>(() => ({}))[0];
+
   // Ranking: top N items by listing count
   const ranking = useMemo(() => {
-    const counts: Record<string, { count: number; avgPrice: number; icon: string; prices: number[] }> = {};
+    const counts: Record<string, { count: number; prices: number[] }> = {};
     marketItems.forEach(item => {
       const key = normalizeItemName(item.name);
-      if (!counts[key]) counts[key] = { count: 0, avgPrice: 0, icon: item.iconUrl, prices: [] };
+      // Save icon once per name — never overwrite to keep it stable
+      if (!iconCache[key] && item.iconUrl) iconCache[key] = item.iconUrl;
+      if (!counts[key]) counts[key] = { count: 0, prices: [] };
       counts[key].count++;
       counts[key].prices.push(item.price);
-      counts[key].icon = item.iconUrl;
     });
     return Object.entries(counts)
       .map(([name, v]) => ({
         name,
         count: v.count,
-        avgPrice: Math.round(v.prices.reduce((a, b) => a + b, 0) / v.prices.length),
         minPrice: Math.min(...v.prices),
-        icon: v.icon,
+        icon: iconCache[name] || '',
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 8);
-  }, [marketItems]);
+  }, [marketItems, iconCache]);
 
   // Open price chart for an item
   const openChart = useCallback(async (itemName: string) => {
