@@ -79,7 +79,7 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
       );
       if (priceField) {
         const cleanVal = cleanEmojis(priceField.value);
-        const pm = cleanVal.match(/(\d[\d,.]*)/);
+        const pm = cleanVal.match(/(\d+(?:[,.]\d+)*)/);
         if (pm) {
           price = parseFloat(pm[1].replace(/,/g, ''));
           currency = priceField.value.toLowerCase().includes('adena') ? 'Adena' : 'zCoin';
@@ -94,7 +94,7 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
         embed.description || '',
         ...(embed.fields || []).map((f: any) => `${f.name} ${f.value}`)
       ].join(' '));
-      const pm = fullText.match(/(\d[\d,.]+)/g);
+      const pm = fullText.match(/(\d+(?:[,.]\d+)*)/g);
       if (pm) price = parseFloat(pm[pm.length - 1].replace(/,/g, ''));
     }
 
@@ -112,7 +112,7 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
         currency: match[3].toLowerCase() === 'adena' ? 'Adena' : 'zCoin',
       };
     }
-    const pm = text.match(/(\d[\d,.]*)\s*(zcoin|adena)/i);
+    const pm = text.match(/(\d+(?:[,.]\d+)*)\s*(zcoin|adena)/i);
     if (pm) {
       const namePart = cleanEmojis(text.split(pm[0])[0]).replace(/[-:,]$/, '').trim();
       if (namePart) {
