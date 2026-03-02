@@ -1,6 +1,8 @@
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import apiApp from './api/index.js';
+import { startMarketBot } from './src/bot/marketBot.js';
+import 'dotenv/config';
 
 async function startServer() {
   const app = express();
@@ -17,6 +19,8 @@ async function startServer() {
 
   app.listen(3000, '0.0.0.0', () => {
     console.log('Server running on http://localhost:3000');
+    // Start Discord Market Bot
+    startMarketBot();
   });
 }
 
