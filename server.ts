@@ -2,6 +2,7 @@ import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import apiApp from './api/index.js';
 import { startMarketBot } from './src/bot/marketBot.js';
+import { startMarketPoller } from './src/bot/marketPoller.js';
 import 'dotenv/config';
 
 async function startServer() {
@@ -19,8 +20,10 @@ async function startServer() {
 
   app.listen(3000, '0.0.0.0', () => {
     console.log('Server running on http://localhost:3000');
-    // Start Discord Market Bot
+    // Start Discord Market Bot (WebSocket — para servidor próprio)
     startMarketBot();
+    // Start ZGaming Market Poller (REST polling a cada 15s)
+    startMarketPoller();
   });
 }
 
