@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
+import { startTelegramBot, sendTelegramNotification } from './telegramBot.js';
 
 const USER_TOKEN = process.env.DISCORD_USER_TOKEN || '';
 const CHANNEL_ID = process.env.ZGAMING_MARKET_CHANNEL_ID || '';
@@ -199,6 +200,8 @@ async function pollMessages() {
         if (!error) {
           console.log(`📦 Market item: ${parsed.name} — ${parsed.price} ${parsed.currency}`);
           newCount++;
+          // Telegram notification
+          await sendTelegramNotification(parsed.name, parsed.price, parsed.currency, msg.timestamp);
         } else if (error.code !== '23505') { // ignore duplicate key
           console.error('Supabase error:', error.message);
         }
@@ -225,6 +228,9 @@ export function startMarketPoller() {
   }
 
   console.log(`🔄 ZGaming Market Poller started (every ${POLL_INTERVAL_MS / 1000}s) — Channel: ${CHANNEL_ID}`);
+
+  // Start Telegram bot alongside poller
+  startTelegramBot();
 
   // First poll immediately, then every 5s
   pollMessages();
