@@ -7,7 +7,7 @@ const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://mgylypvmgjebvpxhl
 const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_RG-4on-iquEBjcvHD-ZAMw_SqZTkHTS';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const POLL_INTERVAL_MS = 15000;
+const POLL_INTERVAL_MS = 5000; // 5 seconds
 
 let lastMessageId: string | null = null;
 

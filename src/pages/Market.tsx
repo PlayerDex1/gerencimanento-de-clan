@@ -75,8 +75,40 @@ export default function Market() {
   useEffect(() => {
     fetchItems();
     fetchAlerts();
-    const interval = setInterval(() => { fetchItems(); fetchAlerts(); }, POLL_INTERVAL);
-    return () => clearInterval(interval);
+
+    // Poll every 5s as fallback
+    const interval = setInterval(fetchItems, POLL_INTERVAL);
+
+    // Supabase Realtime — instant update when bot inserts new item
+    const channel = supabase
+      .channel('market_items_realtime')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'market_items',
+      }, (payload) => {
+        const d = payload.new as any;
+        setMarketItems(prev => {
+          const exists = prev.some(i => i.id === d.id);
+          if (exists) return prev;
+          return [{
+            id: d.id,
+            name: d.name,
+            price: d.price,
+            currency: d.currency,
+            timestamp: d.timestamp,
+            iconUrl: d.icon_url || '',
+          }, ...prev].slice(0, 100);
+        });
+        setBotConnected(true);
+        setLastUpdate(new Date());
+      })
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
   }, [fetchItems, fetchAlerts]);
 
   const saveAlerts = (updated: MarketAlert[]) => {
