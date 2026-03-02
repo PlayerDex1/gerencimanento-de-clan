@@ -138,11 +138,10 @@ export default function Market() {
           <p className="text-zinc-400 mt-1">Live feed of items from the ZGaming market.</p>
         </div>
         <div className="flex items-center gap-3 flex-wrap justify-end">
-          {/* Connection status */}
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium ${botConnected ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-zinc-800 border-zinc-700 text-zinc-500'
             }`}>
             <div className={`w-2 h-2 rounded-full ${botConnected ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-600'}`} />
-            {botConnected ? 'Bot Connected' : 'Bot Offline'}
+            {botConnected ? '🟢 Live Data' : '⚠️ Aguardando dados'}
           </div>
 
           {/* Alerts button */}
