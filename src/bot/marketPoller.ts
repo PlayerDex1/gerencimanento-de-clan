@@ -226,7 +226,10 @@ export function startMarketPoller() {
 
   console.log(`🔄 ZGaming Market Poller started (every ${POLL_INTERVAL_MS / 1000}s) — Channel: ${CHANNEL_ID}`);
 
-  // First poll immediately, then every 15s
+  // First poll immediately, then every 5s
   pollMessages();
   setInterval(pollMessages, POLL_INTERVAL_MS);
 }
+
+// Auto-start when run directly (Railway/standalone)
+startMarketPoller();
