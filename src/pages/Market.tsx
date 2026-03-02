@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Search, Clock, ArrowUpDown, Filter, Bell, BellOff, Plus, X, Zap, Trash2, DollarSign, TrendingUp, BarChart2, ChevronRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { supabase } from '../lib/supabase';
@@ -84,16 +84,15 @@ export default function Market() {
   const [chartData, setChartData] = useState<{ time: string; price: number }[]>([]);
   const [chartLoading, setChartLoading] = useState(false);
 
-  // Stable icon cache — persists first seen icon per item name (prevents flicker on re-renders)
-  const iconCache = useState<Record<string, string>>(() => ({}))[0];
+  // Stable icon cache via useRef — persists first seen icon per name without triggering re-renders
+  const iconCache = useRef<Record<string, string>>({});
 
   // Ranking: top N items by listing count
   const ranking = useMemo(() => {
     const counts: Record<string, { count: number; prices: number[] }> = {};
     marketItems.forEach(item => {
       const key = normalizeItemName(item.name);
-      // Save icon once per name — never overwrite to keep it stable
-      if (!iconCache[key] && item.iconUrl) iconCache[key] = item.iconUrl;
+      if (!iconCache.current[key] && item.iconUrl) iconCache.current[key] = item.iconUrl;
       if (!counts[key]) counts[key] = { count: 0, prices: [] };
       counts[key].count++;
       counts[key].prices.push(item.price);
@@ -103,11 +102,11 @@ export default function Market() {
         name,
         count: v.count,
         minPrice: Math.min(...v.prices),
-        icon: iconCache[name] || '',
+        icon: iconCache.current[name] || '',
       }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 8);
-  }, [marketItems, iconCache]);
+  }, [marketItems]);
 
   // Open price chart for an item
   const openChart = useCallback(async (itemName: string) => {
