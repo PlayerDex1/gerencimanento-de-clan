@@ -34,8 +34,9 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
   if (msg.embeds && msg.embeds.length > 0) {
     const embed = msg.embeds[0];
 
-    // Log embed structure to understand ZGaming format
+    // Log embed structure
     console.log('[ZGaming Embed]', JSON.stringify({
+      author: embed.author,
       title: embed.title,
       description: embed.description?.slice(0, 150),
       fields: embed.fields,
@@ -44,7 +45,10 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
     // 1. Item name: author.name > title > field > description
     let itemName = '';
     if (embed.author?.name) {
-      itemName = cleanEmojis(embed.author.name);
+      // Remove common ZGaming suffix
+      itemName = cleanEmojis(embed.author.name)
+        .replace(/\s*was added on the market\.?\s*/gi, '')
+        .trim();
     } else if (embed.title && !/^\s*price\s*$/i.test(embed.title)) {
       itemName = cleanEmojis(embed.title);
     }

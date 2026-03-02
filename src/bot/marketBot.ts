@@ -85,7 +85,7 @@ export function startMarketBot() {
         ],
     });
 
-    client.once('ready', () => {
+    client.once('clientReady', () => {
         console.log(`✅ Market Bot connected as ${client.user?.tag}`);
         console.log(`👀 Monitoring channel: ${CHANNEL_ID}`);
     });
