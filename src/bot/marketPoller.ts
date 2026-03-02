@@ -34,7 +34,7 @@ function cleanEmojis(text: string): string {
 }
 
 // Parse price and name from Discord message (embed or plain text)
-function parseMessage(msg: any): { name: string; price: number; currency: string } | null {
+function parseMessage(msg: any): { name: string; price: number; currency: string; iconUrl?: string } | null {
   if (msg.embeds && msg.embeds.length > 0) {
     const embed = msg.embeds[0];
 
@@ -43,6 +43,8 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
       author: embed.author,
       title: embed.title,
       description: embed.description?.slice(0, 150),
+      thumbnail: embed.thumbnail,
+      image: embed.image,
       fields: embed.fields,
     }, null, 2));
 
@@ -98,7 +100,12 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
       if (pm) price = parseFloat(pm[pm.length - 1].replace(/,/g, ''));
     }
 
-    if (itemName && price > 0) return { name: itemName, price, currency };
+    if (itemName && price > 0) {
+      // Extract real icon from embed thumbnail or image
+      const iconUrl = embed.thumbnail?.url || embed.thumbnail?.proxy_url
+        || embed.image?.url || embed.author?.icon_url || undefined;
+      return { name: itemName, price, currency, iconUrl };
+    }
   }
 
   // Plain text fallback
@@ -186,7 +193,7 @@ async function pollMessages() {
           price: parsed.price,
           currency: parsed.currency,
           timestamp: msg.timestamp,
-          icon_url: guessIconUrl(parsed.name),
+          icon_url: parsed.iconUrl || guessIconUrl(parsed.name),
         }, { onConflict: 'id' });
 
         if (!error) {
