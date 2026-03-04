@@ -348,7 +348,20 @@ export default function MarketHome() {
                                                     <span className="font-bold text-amber-500">{item.price.toLocaleString()} {item.currency}</span>
                                                     {extractQuantity(item.name) > 1 && (
                                                         <span className="text-[10px] text-zinc-500">
-                                                            {extractQuantity(item.name)}x • {(item.price / extractQuantity(item.name)).toLocaleString(undefined, { maximumFractionDigits: 1 })} {item.currency}/un
+                                                            {(() => {
+                                                                const qty = extractQuantity(item.name);
+                                                                const unitPrice = item.price / qty;
+                                                                // Se for moeda comum de auto-volume e o unitario for microscopicamente baixo
+                                                                if (unitPrice < 0.01) {
+                                                                    // Mostra o preco por 1kk (1 milhao) ou 100kk
+                                                                    if (qty >= 1000000000) return `${qty.toLocaleString()}x • ${(unitPrice * 100000000).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${item.currency}/100kk`;
+                                                                    if (qty >= 1000000) return `${qty.toLocaleString()}x • ${(unitPrice * 1000000).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${item.currency}/1kk`;
+                                                                    // Fallback pra exato decimal
+                                                                    return `${qty.toLocaleString()}x • ${unitPrice.toFixed(6)} ${item.currency}/un`;
+                                                                }
+                                                                // Uso normal
+                                                                return `${qty.toLocaleString()}x • ${unitPrice.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${item.currency}/un`;
+                                                            })()}
                                                         </span>
                                                     )}
                                                 </div>
