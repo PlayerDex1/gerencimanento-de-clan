@@ -167,7 +167,7 @@ export async function sendDiscordNotification(serverId: string, name: string, pr
           `📦 **${name}**\n` +
           `💰 **${price.toLocaleString()} ${currency}**\n\n` +
           `🔎 Motivo: Match no alerta "${alert.keyword}"\n` +
-          `Ver: https://zgaming-market-tracker.vercel.app/item/${urlName}`;
+          `Ver: https://gerencimanento-de-clan.vercel.app/item/${urlName}`;
 
         await sendDiscordDM(alert.discord_id, message);
       }
