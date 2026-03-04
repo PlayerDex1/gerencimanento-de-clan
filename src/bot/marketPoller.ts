@@ -36,7 +36,21 @@ function cleanEmojis(text: string): string {
 }
 
 // Parse price and name from Discord message (embed or plain text)
-function parseMessage(msg: any): { name: string; price: number; currency: string; iconUrl?: string } | null {
+function parseMessage(msg: any, serverId: string): { name: string; price: number; currency: string; iconUrl?: string } | null {
+  // Helper para converter string de preco dependendo do servidor
+  const parsePriceStr = (valStr: string, sId: string) => {
+    // ZGaming: "15,000" significa 15000 zCoin
+    // Pride: "5.555" significa 5 moedas e 555 centavos
+    if (sId === 'pride') {
+      // Pride usa ponto ou virgula como decimal (5.555 ou 5,555). 
+      // Substituimos virgula por ponto e parseFloat
+      return parseFloat(valStr.replace(/,/g, '.'));
+    } else {
+      // ZGaming remove todas as virgulas de milhares
+      return parseFloat(valStr.replace(/,/g, ''));
+    }
+  };
+
   if (msg.embeds && msg.embeds.length > 0) {
     const embed = msg.embeds[0];
 
@@ -88,7 +102,7 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
         const cleanVal = cleanEmojis(priceField.value);
         const pm = cleanVal.match(/(\d+(?:[,.]\d+)*)/);
         if (pm) {
-          price = parseFloat(pm[1].replace(/,/g, ''));
+          price = parsePriceStr(pm[1], serverId);
           currency = priceField.value.toLowerCase().includes('adena') ? 'Adena' : 'zCoin';
         }
       }
@@ -98,7 +112,7 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
     if (!price && embed.description) {
       const descMatch = cleanEmojis(embed.description).match(/Price:\s*(\d+(?:[,.]\d+)*)\s*(Pride Coin|zCoin|Adena)/i);
       if (descMatch) {
-        price = parseFloat(descMatch[1].replace(/,/g, ''));
+        price = parsePriceStr(descMatch[1], serverId);
         currency = descMatch[2].trim();
       }
     }
@@ -111,7 +125,7 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
         ...(embed.fields || []).map((f: any) => `${f.name} ${f.value}`)
       ].join(' '));
       const pm = fullText.match(/(\d+(?:[,.]\d+)*)/g);
-      if (pm) price = parseFloat(pm[pm.length - 1].replace(/,/g, ''));
+      if (pm) price = parsePriceStr(pm[pm.length - 1], serverId);
     }
 
     if (itemName && price > 0) {
@@ -125,22 +139,22 @@ function parseMessage(msg: any): { name: string; price: number; currency: string
   // Plain text fallback
   const text = msg.content || '';
   if (text) {
-    const match = text.match(/^(.+?)\s*[-:–]\s*(\d[\d,.]*)\s*(zcoin|adena|zc)/i);
+    const match = text.match(/^(.+?)\s*[-:–]\s*(\d[\d,.]*)\s*(zcoin|adena|zc|pride|pride coin)/i);
     if (match) {
       return {
         name: match[1].trim(),
-        price: parseFloat(match[2].replace(/,/g, '')),
-        currency: match[3].toLowerCase() === 'adena' ? 'Adena' : 'zCoin',
+        price: parsePriceStr(match[2], serverId),
+        currency: match[3].toLowerCase() === 'adena' ? 'Adena' : (match[3].toLowerCase().includes('pride') ? 'Pride Coin' : 'zCoin'),
       };
     }
-    const pm = text.match(/(\d+(?:[,.]\d+)*)\s*(zcoin|adena)/i);
+    const pm = text.match(/(\d+(?:[,.]\d+)*)\s*(zcoin|adena|zc|pride|pride coin)/i);
     if (pm) {
       const namePart = cleanEmojis(text.split(pm[0])[0]).replace(/[-:,]$/, '').trim();
       if (namePart) {
         return {
           name: namePart,
-          price: parseFloat(pm[1].replace(/,/g, '')),
-          currency: pm[2].toLowerCase() === 'adena' ? 'Adena' : 'zCoin',
+          price: parsePriceStr(pm[1], serverId),
+          currency: pm[2].toLowerCase() === 'adena' ? 'Adena' : (pm[2].toLowerCase().includes('pride') ? 'Pride Coin' : 'zCoin'),
         };
       }
     }
@@ -229,7 +243,7 @@ async function pollMessagesForServer(server: { id: string, channelId: string, na
       // Only process bot messages (ZGaming bot)
       if (!msg.author?.bot) continue;
 
-      const parsed = parseMessage(msg);
+      const parsed = parseMessage(msg, server.id);
       if (!parsed) continue;
 
       const item = {

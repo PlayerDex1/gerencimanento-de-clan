@@ -345,7 +345,7 @@ export default function MarketHome() {
                                             </td>
                                             <td className="px-4 py-2.5">
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-amber-500">{item.price.toLocaleString()} {item.currency}</span>
+                                                    <span className="font-bold text-amber-500">{item.price.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })} {item.currency}</span>
                                                     {extractQuantity(item.name) > 1 && (
                                                         <span className="text-[10px] text-zinc-500">
                                                             {(() => {
@@ -360,7 +360,7 @@ export default function MarketHome() {
                                                                     return `${qty.toLocaleString()}x • ${unitPrice.toFixed(6)} ${item.currency}/un`;
                                                                 }
                                                                 // Uso normal
-                                                                return `${qty.toLocaleString()}x • ${unitPrice.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${item.currency}/un`;
+                                                                return `${qty.toLocaleString()}x • ${unitPrice.toLocaleString(undefined, { maximumFractionDigits: item.currency === 'Pride Coin' ? 3 : 1 })} ${item.currency}/un`;
                                                             })()}
                                                         </span>
                                                     )}
